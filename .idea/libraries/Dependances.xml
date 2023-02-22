@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="Dependances">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../Dependances" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../Dependances/graphviz-java-master/graphviz-java/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../Dependances/graphviz-java-master/graphviz-java/src/test/java" />
+      <root url="file://$PROJECT_DIR$/../Dependances/graphviz-java-master/graphviz-rough/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../Dependances/graphviz-java-master/graphviz-rough/src/test/java" />
+      <root url="file://$PROJECT_DIR$/../Dependances" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/../Dependances" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/../Dependances" recursive="false" type="SOURCES" />
+  </library>
+</component>
