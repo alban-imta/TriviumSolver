@@ -77,6 +77,7 @@ public class TriviumAlban {
     /*
      * functions to build graphs
      * */
+
     /*
     builds graph from scratch builds all 5 succs from node round 0 up to nbRound.
      */
@@ -155,29 +156,10 @@ public class TriviumAlban {
         graph = m.digraphVar("trivium", glb, gub);
     }
 
-    public void createGraphFromExport(){
-        SetType dftSetType = SetType.RANGESET;
-        DirectedGraph glb = new DirectedGraph(m,3*nbMaxNodePerRegistre+1, dftSetType,false);
-        DirectedGraph gub = new DirectedGraph(m,3*nbMaxNodePerRegistre+1, dftSetType,false);
-        //graph initial debugg :
-/*
-        SuperPoly:
-        x5
-        Model[Graph Model], 27673 Solutions, Resolution time 994.558s, 6339272 Nodes (6,374.0 n/s), 12623199 Backtracks, 6283927 Fails, 0 Restarts
-        nbElem:621
-        nbAdded:3903778
-
-SuperPoly:
-x5
-Model[Graph Model], 27673 Solutions, Resolution time 2.741s, 56645 Nodes (20,668.8 n/s), 57945 Backtracks, 1300 Fails, 0 Restarts
-nbElem:621
-nbAdded:3903778
- */
-
-
-        graph = m.digraphVar("trivium", glb, gub);
-    }
-
+    /**
+    *builds graph from a predetermined list of arcs.
+    *the list can be build by printJavaCodeOfGraphVar().
+     * */
     public void createGraphFromArcList(){
         SetType dftSetType = SetType.RANGESET;
         DirectedGraph glb = new DirectedGraph(m,3*nbMaxNodePerRegistre+1, dftSetType,false);
@@ -198,10 +180,6 @@ nbAdded:3903778
         //enforceSolution(glb,gub);
         graph = m.digraphVar("trivium", glb, gub);
     }
-
-
-
-
     public void manageSourceAndSink(DirectedGraph glb,DirectedGraph gub){
         glb.addNode(idxSource);
         gub.addNode(idxSource);
@@ -245,115 +223,11 @@ nbAdded:3903778
         }
     }
 
-    public void manageZ(DirectedGraph glb,DirectedGraph gub){
-        //for(int i:new int[]{109,110,111}){
-        for(int i=1;i<=111;i++){
-            //aucun des Z
-            gub.removeEdge(i+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        }
-    }
-
-    public void enforceSolution(DirectedGraph glb,DirectedGraph gub){
-        if(false) return;
-        ArrayList<Integer> enforceCube = new ArrayList<>(List.of());
-        if(!enforceCube.isEmpty())
-            for(int i=1;i<=80;i++){
-                //from register A: nothing is mandatory, so its added to GUB only.
-                int j=i+nbInnerRound;
-                if(enforceCube.contains(i)){
-                    glb.addEdge(j,idxSink);
-                }else{gub.removeNode(j);
-                }
-            }
-        //add constant z109/110/111
-        //gub.removeEdge(109+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        //gub.removeEdge(110+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        //gub.removeEdge(111+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        //other way to remove nodes.//pas 26
-
-        //1
-        gub.removeEdge(idxSource,getNumberFromName("B84"));
-        //1.1
-
-        gub.removeEdge(getNumberFromName("B82"),getNumberFromName("A148"));
-        //1.2
-        gub.removeEdge(getNumberFromName("B82"),getNumberFromName("A173"));
-        //1.3
-        gub.removeEdge(getNumberFromName("B82"),getNumberFromName("A175"));
-        //1.4
-        //gub.removeEdge(getNumberFromName("B82"),getNumberFromName("B160"));
-        //1.A
-        gub.removeEdge(getNumberFromName("B83"),getNumberFromName("A149"));
-        //1.B
-        //gub.removeEdge(getNumberFromName("B83"),getNumberFromName("A174"));
-        //1.C
-        gub.removeEdge(getNumberFromName("B83"),getNumberFromName("A176"));
-        //1.D
-        gub.removeEdge(getNumberFromName("B83"),getNumberFromName("B161"));
-
-        //2.
-        //gub.removeEdge(idxSource,getNumberFromName("B82"));
-
-
-        ArrayList<Integer> add = new ArrayList<Integer>(List.of(-1238,-251));
-        //add.add(1368);
-        for(int i:add){
-            if(i<0){
-                gub.removeNode(-i);
-                glb.removeNode(-i);
-            }else{
-                glb.addNode(i);
-            }
-        }
-        //glb.addNode(getNumberFromName("B82"));
-    }
-
-    public void limitSolution(DirectedGraph glb,DirectedGraph gub){
-        if(false) return;
-        ArrayList<Integer> nodeFromA = new ArrayList<>(List.of(621));//-11111 tu remove all nodes from reg A.
-        if(!nodeFromA.isEmpty())
-            for(int i=1;i<=80;i++){
-                int j=i+nbInnerRound;
-                if(nodeFromA.contains(j)){
-                    System.out.println("adding edge to sink from: "+j);
-                    glb.addEdge(j,idxSink);
-                }else{
-                    System.out.println("removing edge to sink from: "+j);
-                    gub.removeNode(j);
-                }
-            }
-        //add constant z109/110/111
-        //gub.removeEdge(109+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        //gub.removeEdge(110+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        //gub.removeEdge(111+nbInnerRound+2*nbMaxNodePerRegistre,idxSink);
-        //other way to remove nodes.//pas 26
-
-
-        //2.
-        //gub.removeEdge(idxSource,getNumberFromName("B82"));
-
-
-        ArrayList<Integer> add = new ArrayList<Integer>(List.of(1606-238,1606-284,606-458,1606-266,606-217));
-        //add.add(1368);
-        for(int i:add){
-            if(i<0){
-                gub.removeNode(-i);
-                glb.removeNode(-i);
-            }else{
-                glb.addNode(i);
-            }
-        }
-        //glb.addNode(getNumberFromName("B82"));
-        glb.addEdge(606-147,2606-81);
-    }
-
 
 
     /*
     Utility Functions
      */
-
-
 
     public boolean isNodeRegisterA(int nodes){
         return nodes<nbMaxNodePerRegistre;
@@ -370,7 +244,6 @@ nbAdded:3903778
     public boolean isNodeSource(int nodes){
         return nodes==idxSource;
     }
-
     public int arcRoundDistance(int from, int to){
         if(getRound(to)-getRound(from)<0) {
             System.out.println("BUGGGG arcRoundDistance from"+from+">"+to+"to");
@@ -548,7 +421,6 @@ nbAdded:3903778
     /*
     Printing Functions
     */
-
     public static void printJavaCodeOfGraphVar(DirectedGraphVar g){
         StringBuilder sb = new StringBuilder();
         for(int from:utilitaire.roundCroissant(g.getPotentialNodes())){
@@ -641,7 +513,6 @@ nbAdded:3903778
         }
 
     }
-
     public static void printListOfArc(){
         System.out.println("nbElem:"+arcList.size());
         System.out.println("nbAdded:"+nbArc);
@@ -650,7 +521,6 @@ nbAdded:3903778
         }
         System.out.println();
     }
-
     /*
     // exemple 675_4 a 3 path miroir !
     public void enforceSolution675_4(DirectedGraph glb,DirectedGraph gub){
@@ -756,29 +626,17 @@ nbAdded:3903778
 
 
 
-    public void postConstraints(boolean alt_launch){
+    public void postConstraints(){
+        //post 2 flow for fixed point.
         new Constraint("TriviumFlow1", new PropTriviumFlow(this)).post();
         new Constraint("TriviumFlow2", new PropTriviumFlow(this)).post();
         InitRIV();
         InitRIVSets();
-        if(!alt_launch){
-            System.out.println("reccu V3 version :");
-            //new Constraint("RIVVAR_AND_SET INCR", new PropRIV_VARandSet_IncrV3(this)).post();
-            //new Constraint("RIVVAR_AND_SET INCR", new PropRIV_VARandSet_IncrV2(this)).post();
-            //new Constraint("RIVVAR_AND_SET INCR", new PropRIV_VARandSet_recurssively(this)).post();
-            //          new Constraint("RIVVAR_AND_SET", new PropRIV_VARandSet_alban(this)).post();
 
-        }else{
-            System.out.println("SET version :");
-            //new Constraint("RIVVAR_AND_SET INCR", new PropRIV_VARandSet_Incr(this)).post();
-            //new Constraint("RIVVAR_AND_SET", new PropRIV_VARandSet_alban(this)).post();
-            new Constraint("RIVVAR", new PropRIV_VAR_alban(this)).post();
-            //new Constraint("RIVSET", new PropReachable_TestSet(this)).post();
-            //new Constraint("Mult3New", new PropTrio_alban(this)).post();
-        }
-        //new Constraint("RIV", new PropReachable_alban(this)).post();
-        //new Constraint("RIV", new PropRIV_alban(this)).post();
-        //if(breakSym)new Constraint("SymBreaker length", new PropBlockSomepath(this)).post();
+        System.out.println("VAR only version :");
+        new Constraint("RIVVAR", new PropRIV_VAR_alban(this)).post();
+        //System.out.println("Var and SET version :");
+        //new Constraint("RIVVAR", new PropRIV_VARandSet_alban(this)).post();
     }
 
     private void InitRIVSets(){
@@ -830,19 +688,6 @@ nbAdded:3903778
         }
     }
 
-    public void setSearch(Solver solv, boolean changes){
-        // test d'enchainement, mais ca marche pas.
-        // solv.setSearch(new StrategiesSequencer(new MySearch(this),new MyGraphSearch(graph,this)));
-        if(true){
-            solv.setSearch(new MyGraphSearch(graph,this));
-        }else{
-            solv.setSearch(new MyGraphSearch(graph,this));
-        }
-        //solv.setSearch(new MyGraphSearch(graph,this));
-        //solv.setSearch(new MySearch(this));
-    }
-
-
 
     public static int GRAPHFROMMODEL=0;
     public static int GRAPHFROMEXPORTARC=1;
@@ -853,18 +698,19 @@ nbAdded:3903778
         //createGraphFromArcList();
 
         utilitaire.setTriviumVar(this);//here everything is done
-        postConstraints(true);
+        postConstraints();
 
         Solver solver = m.getSolver();
-        setSearch(solver,changes);
+        solver.setSearch(new MyGraphSearch(graph,this));
+
         //solver.showDecisions(()->"");
         //solver.showSolutions(()->"");
         //solver.showContradiction();
         //solver.limitSearch(() -> solver.getMeasures().getNodeCount()>=217);
         try {
             solver.propagate();
-            utilitaire.graphVizExport(this);
-            startPrinting = true;
+            //utilitaire.graphVizExport(this); //to export the graph after the first (root) propagation
+            startPrinting = false;
             //utilitaire.graphVizPrint(this);
             //utilitaire.graphVizExport(this);
 
@@ -881,8 +727,6 @@ nbAdded:3903778
 
             //solveAndPrintSol(solver);
             //solver.printShortStatistics();
-            //if(true) return;
-            //System.out.println("AFTER PROPAG INITIAL");
 
 
             //solver.solve();
@@ -897,7 +741,6 @@ nbAdded:3903778
     public void solveAndPrintSolutions(Solver solver){
         while(solveAndPrintSolution(solver));
     }
-
     public boolean solveAndPrintSolution(Solver solver){
         if(solver.solve()){//if a solution has been found
             List<Integer> ivs = Arrays.stream(instance.iv).boxed().toList();
@@ -917,13 +760,17 @@ nbAdded:3903778
         return false;
     }
 
-    int cpt=0;
+    /**
+     * Search for all solution, and print the superpoly at the end of search.
+     * @param solver
+     */
     public void FindSuperPoly(Solver solver){
+        int cpt=0;
         HashMap<String, Integer> map = new HashMap<>();
         while(solver.solve()){
             //solver.showSolutions();
-            exportArcFromSolution();
-            utilitaire.TikZexport(this);
+            //exportArcFromSolution();
+            //utilitaire.TikZexport(this);
 
             if(false){
                 System.out.println();
@@ -947,7 +794,7 @@ nbAdded:3903778
                 map.put(foundNothing,1);
             }
         }
-        printListOfArc();
+        //printListOfArc();
 
         System.out.println("SuperPoly:");
         for(Map.Entry<String, Integer> entry : map.entrySet()){
@@ -955,7 +802,7 @@ nbAdded:3903778
                 System.out.println(entry.getValue()+"\t#"+entry.getKey());
             }
         }
-        if(true) return;
+        if(true) return;//set to false if you also want to see solutions found with over count.
         System.out.println("Non SuperPoly:");
         for(Map.Entry<String, Integer> entry : map.entrySet()){
             if(entry.getValue()%2==0){
@@ -966,19 +813,11 @@ nbAdded:3903778
     }
 
 
-    /*
-    main function
-    with 2 call of the same instance in order to compare.
-    either when changing the "boolean" which switch between our current test
-    or by chaging
-
-    at the end, after the 2nd hack if(false): the old call from Arthur
-     */
-    // GRAPHFROMEXPORTARC or  GRAPHFROMMODEL
+    // option : GRAPHFROMEXPORTARC or  GRAPHFROMMODEL
     public static void main(String[] args) throws CmdLineException {
 
 
-        //iv735_1 iv672_2
+        //iv672_2
         args = "-i iv672_2".split(" ");
         System.out.println("solving by alban "+args[1]);
         TriviumAlban ta = new TriviumAlban(args);

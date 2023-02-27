@@ -25,7 +25,8 @@ import utils.utilitaire;
  * <br/>
  *
  * @author Alban DERRIEN
- * @since 01/03/2022
+ * @since 01/03/2023
+ * Compute the Reacheable IV, using one (IntVar) variable for each node
  */
 public class PropRIV_VAR_alban extends Propagator<Variable> {
 
@@ -86,14 +87,6 @@ public class PropRIV_VAR_alban extends Propagator<Variable> {
         }
     }
 
-
-    public void printState(int node){
-       //2  System.out.println("state of node:"+node +" is mandatory:"+graph.getMandatoryNodes().contains(node));
-       //2  System.out.println("potentia pred:"+graph.getPotentialPredecessorOf(node));
-       //2  System.out.println("mandator pred:"+graph.getMandatoryPredecessorsOf(node));
-       //2  System.out.println("potentia succ:"+graph.getPotentialSuccessorsOf(node));
-       //2  System.out.println("mandator succ:"+graph.getMandatorySuccessorsOf(node));
-    }
     private void computeRivLB() throws ContradictionException {
         //starting from the source, we are computing each value down to the sink.
         for (int node : utilitaire.roundCroissant(trivium.graph.getPotentialNodes())) {
@@ -106,18 +99,14 @@ public class PropRIV_VAR_alban extends Propagator<Variable> {
     private void computeRIVLB(int node) throws ContradictionException {
         if (graph.getPotentialPredecessorOf(node).size() == 0) {//maybe be 'this' has remove previous nodes.
             if(graph.getPotentialNodes().contains(node)){
-                //System.out.println("removing node no pred:"+node+" is mand:"+graph.getMandatoryNodes().contains(node));
-                //System.out.print(node+",");
                 graph.removeNode(node, this);
             }
             return;
         }
         if (graph.getPotentialSuccessorsOf(node).size() == 0) {//maybe be 'this' has remove succ nodes.
             if(graph.getPotentialNodes().contains(node)){
-                //System.out.println("removing node no succ:"+node+" is mand:"+graph.getMandatoryNodes().contains(node));
                 graph.removeNode(node, this);
             }
-            //return;
         }
         int newLB;
         int minPredLB=NBTOREACH;
@@ -125,7 +114,6 @@ public class PropRIV_VAR_alban extends Propagator<Variable> {
             if (trivium.isArcDoubling(p, node)) {
                 int doubling2 = trivium.getOtherDoubling(p, node);
                 if(!graph.getPotentialNodes().contains(doubling2)) {
-                   //2  System.out.println("RIV removing arc1:"+p +" :"+node);
                     graph.removeEdge(p,node,this);//filtering 1/3
                     continue;
                 }
@@ -134,7 +122,6 @@ public class PropRIV_VAR_alban extends Propagator<Variable> {
                 newLB = RIV[p].getLB();
             }
             if(newLB>RIV[node].getUB()){
-               //2  System.out.println("RIV removing arc2:"+p +" :"+node);
                 graph.removeEdge(p,node,this);//filtering 2/3
             }
             minPredLB = Math.min(minPredLB,newLB );
@@ -161,14 +148,6 @@ public class PropRIV_VAR_alban extends Propagator<Variable> {
 
         int idxd1 = trivium.shift.double1SuccIndex(node);
         int idxd2 = trivium.shift.double2SuccIndex(node);
-
-
-        //Fast computation (from arthur) : sum of both doubling succ.
-        //if(potSucc.contains(idxd1) && potSucc.contains(idxd2) ){
-        //    RivUB[node] = Math.max(RivUB[node], RivUB[idxd1]+RivUB[idxd2]);
-        //}
-        //return;
-
         //no smart computation if we are at the last nodes.
         if(potSucc.contains(idxd1) && potSucc.contains(idxd2) && trivium.getRound(idxd1)>trivium.nbInnerRound){
             maxUB = Math.max(maxUB, RIV[idxd1].getUB()+RIV[idxd2].getUB());
@@ -214,12 +193,6 @@ public class PropRIV_VAR_alban extends Propagator<Variable> {
             }
         }
         updateUB(node,maxUB);
-    }
-
-    public void printRIV() {
-        for (int round = trivium.nbMaxNodePerRegistre; round >= 0; round--) {
-           //2  System.out.println(round + "\t" + RivUB[round] + "\t" + RivUB[round + trivium.nbMaxNodePerRegistre] + "\t" + RivUB[round + 2 * trivium.nbMaxNodePerRegistre]);
-        }
     }
 
 
