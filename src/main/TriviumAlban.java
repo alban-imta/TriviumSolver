@@ -28,7 +28,7 @@ public class TriviumAlban {
 
     @Option(name = "-i",
             aliases = {"--instance"},
-            usage = "Instance à charger (default: iv_672_1).",
+            usage = "Instance à charger (default: iv_672_2). not used atm : forced to default from code.",
             required = true)
     public utils.Instances instance;
 
@@ -48,7 +48,22 @@ public class TriviumAlban {
 
     public boolean  startPrinting = false;
 
-    public TriviumAlban(String... args) throws CmdLineException {
+    public static void main(String[] args) throws CmdLineException {
+        //iv672_2
+        args = "-i iv672_2".split(" ");
+
+        // option : GRAPHFROMEXPORTARC or  GRAPHFROMMODEL
+        //from model means from the complete graph (creating all 5 nodes for every previously constructed node.)
+        //from export arc  means the graph is constructed from a previously build graph (can be used to start from a wanted point in search, if used after an solution's export)
+        TriviumAlban ta = new TriviumAlban(GRAPHFROMMODEL,args);// GRAPHFROMEXPORTARC GRAPHFROMMODEL
+
+        ta.solveTrivium();
+        //System.out.println(nbArc);
+        //printListOfArc();
+    }
+
+
+    public TriviumAlban(int gcmIndex,String... args) throws CmdLineException {
         CmdLineParser cmdparser = new CmdLineParser(this);
         try {
             cmdparser.parseArgument(args);
@@ -64,21 +79,19 @@ public class TriviumAlban {
         this.nbInnerRound = nbRound-lastBit;
         this.idxSource = instance.registerOutputBit*nbMaxNodePerRegistre;
         this.idxSink   = 3*nbMaxNodePerRegistre;
-
         this.shift = new Shift(this);
-
-
         this.m = new Model();
-        //printJavaCodeOfSolution();
-        //this.graph = createGraph(new Model());
+
+        if(gcmIndex == GRAPHFROMMODEL) createGraphFromModel();
+        if(gcmIndex == GRAPHFROMEXPORTARC) createGraphFromArcList();
+        utilitaire.setTriviumVar(this);
     }
-
-
     /*
      * functions to build graphs
      * */
 
-    /*
+    /**
+     *
     builds graph from scratch builds all 5 succs from node round 0 up to nbRound.
      */
     public void createGraphFromModel(){
@@ -366,7 +379,7 @@ public class TriviumAlban {
         for(int n:neighbors){
             if(isValidNumber(n)) nbV++;
         }
-        int res[]=new int[nbV];
+        int[] res =new int[nbV];
         int idxV = 0;
         for(int n:neighbors){
             if(isValidNumber(n)) res[idxV++]=n;
@@ -391,12 +404,8 @@ public class TriviumAlban {
         int[] preds = getFivePred(node);
         int[] succs = getFiveSucc(node);
         int[]res = new int[preds.length+succs.length];
-        for(int i=0;i<preds.length;i++){
-            res[i]=preds[i];
-        }
-        for(int i=0;i<succs.length;i++){
-            res[i+preds.length]=succs[i];
-        }
+        System.arraycopy(preds, 0, res, 0, preds.length);
+        System.arraycopy(succs, 0, res, 0 + preds.length, succs.length);
         return res;
     }
 
@@ -468,7 +477,7 @@ public class TriviumAlban {
         System.out.println(sb);
     }
 
-    public static  HashSet<Integer>arcList= new HashSet<Integer>();
+    public static  HashSet<Integer>arcList= new HashSet<>();
     public static int nbArc=0;
     public void exportArcFromSolution(){
         for(int node:graph.getMandatoryNodes()){
@@ -692,12 +701,7 @@ public class TriviumAlban {
     public static int GRAPHFROMMODEL=0;
     public static int GRAPHFROMEXPORTARC=1;
 
-    public  void solveTrivium(boolean changes, int gcmIndex){
-        if(gcmIndex == GRAPHFROMMODEL) createGraphFromModel();
-        if(gcmIndex == GRAPHFROMEXPORTARC) createGraphFromArcList();
-        //createGraphFromArcList();
-
-        utilitaire.setTriviumVar(this);//here everything is done
+    public  void solveTrivium(){
         postConstraints();
 
         Solver solver = m.getSolver();
@@ -762,7 +766,7 @@ public class TriviumAlban {
 
     /**
      * Search for all solution, and print the superpoly at the end of search.
-     * @param solver
+     * @param solver the current solver (should be outside ref?)
      */
     public void FindSuperPoly(Solver solver){
         int cpt=0;
@@ -780,18 +784,18 @@ public class TriviumAlban {
 
 
             //utilitaire.graphVizExport(this);
-            String foundNothing ="";
+            StringBuilder foundNothing = new StringBuilder();
             for(int node:graph.getMandatoryPredecessorsOf(idxSink)){
                 if(isNodeRegisterA(node)) {
-                    foundNothing += utilitaire.getNodeName(node);
+                    foundNothing.append(utilitaire.getNodeName(node));
                 }
             }
-            if(foundNothing.length()==0) foundNothing="One";
+            if(foundNothing.length()==0) foundNothing = new StringBuilder("One");
             //System.out.println(foundNothing);
-            if(map.containsKey(foundNothing)){
-                map.replace(foundNothing,map.get(foundNothing)+1);
+            if(map.containsKey(foundNothing.toString())){
+                map.replace(foundNothing.toString(),map.get(foundNothing.toString())+1);
             }else{
-                map.put(foundNothing,1);
+                map.put(foundNothing.toString(),1);
             }
         }
         //printListOfArc();
@@ -813,20 +817,6 @@ public class TriviumAlban {
     }
 
 
-    // option : GRAPHFROMEXPORTARC or  GRAPHFROMMODEL
-    public static void main(String[] args) throws CmdLineException {
-
-
-        //iv672_2
-        args = "-i iv672_2".split(" ");
-        System.out.println("solving by alban "+args[1]);
-        TriviumAlban ta = new TriviumAlban(args);
-        ta.solveTrivium(true,GRAPHFROMMODEL);// GRAPHFROMEXPORTARC GRAPHFROMMODEL
-        //System.out.println(nbArc);
-        //printListOfArc();
-
-
-    }
 
 }
 
